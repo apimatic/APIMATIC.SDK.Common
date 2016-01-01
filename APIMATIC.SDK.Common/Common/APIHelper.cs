@@ -41,7 +41,7 @@ namespace APIMATIC.SDK.Common
         /// </summary>
         /// <param name="obj">The object to serialize into JSON</param>
         /// <returns>The serialized Json string representation of the given object</returns>
-        internal static string JsonSerialize(object obj)
+        public static string JsonSerialize(object obj)
         {
             if(null == obj)
                 return null;
@@ -56,7 +56,7 @@ namespace APIMATIC.SDK.Common
         /// <param name="json">The json string to deserialize</param>
         /// <typeparam name="T">The type of the object to desialize into</typeparam>
         /// <returns>The deserialized object</returns>
-        internal static T JsonDeserialize<T>(string json)
+        public static T JsonDeserialize<T>(string json)
         {
             if (string.IsNullOrWhiteSpace(json))
                 return default(T);
@@ -69,7 +69,7 @@ namespace APIMATIC.SDK.Common
         /// </summary>
         /// <param name="queryUrl">The query url string to replace the template parameters</param>
         /// <param name="parameters">The parameters to replace in the url</param>        
-        internal static void AppendUrlWithTemplateParameters
+        public static void AppendUrlWithTemplateParameters
             (StringBuilder queryBuilder, IEnumerable<KeyValuePair<string, object>> parameters)
         {
             //perform parameter validation
@@ -102,7 +102,7 @@ namespace APIMATIC.SDK.Common
         /// </summary>
         /// <param name="queryUrl">The query url string to append the parameters</param>
         /// <param name="parameters">The parameters to append</param>        
-        internal static void AppendUrlWithQueryParameters
+        public static void AppendUrlWithQueryParameters
             (StringBuilder queryBuilder, IEnumerable<KeyValuePair<string, object>> parameters)
         {
             //perform parameter validation
@@ -181,7 +181,7 @@ namespace APIMATIC.SDK.Common
         /// </summary>
         /// <param name="queryBuilder">The given query Url to process</param>
         /// <returns>Clean Url as string</returns>
-        internal static string CleanUrl(StringBuilder queryBuilder)
+        public static string CleanUrl(StringBuilder queryBuilder)
         {
             //convert to immutable string
             string url = queryBuilder.ToString();
@@ -204,7 +204,7 @@ namespace APIMATIC.SDK.Common
         /// </summary>
         /// <param name="sEnumValue">String value to parse</param>
         /// <returns>Parsed enum value in the given type</returns>
-        internal static TEnum ParseEnum<TEnum>(string sEnumValue) where TEnum : struct
+        public static TEnum ParseEnum<TEnum>(string sEnumValue) where TEnum : struct
         {
             TEnum eTemp;
             if (Enum.TryParse<TEnum>(sEnumValue, true, out eTemp) == true)

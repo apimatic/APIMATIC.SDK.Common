@@ -47,20 +47,12 @@ namespace APIMATIC.SDK.Http.Client
         {
             switch (method)
             {
-                case HttpMethod.Get:
-                    return new UniHttpMethod(HttpMethod.Get.ToString());
-
-                case HttpMethod.Post:
-                    return new UniHttpMethod(HttpMethod.Post.ToString());
-
-                case HttpMethod.Put:
-                    return new UniHttpMethod(HttpMethod.Put.ToString());
-
-                case HttpMethod.Patch:
-                    return new UniHttpMethod(HttpMethod.Patch.ToString());
-
-                case HttpMethod.Delete:
-                    return new UniHttpMethod(HttpMethod.Delete.ToString());
+                case HttpMethod.GET:
+                case HttpMethod.POST:
+                case HttpMethod.PUT:
+                case HttpMethod.PATCH:
+                case HttpMethod.DELETE:
+                    return new UniHttpMethod(method.ToString().ToUpperInvariant());
 
                 default:
                     throw new ArgumentOutOfRangeException("Unkown method" + method.ToString());
@@ -161,80 +153,79 @@ namespace APIMATIC.SDK.Http.Client
         {
             return Task.Factory.StartNew(() => ExecuteAsString(request));
         }
-
-
+        
         public HttpRequest Get(string queryUrl, Dictionary<string, string> headers, string username = null, string password = null)
         {
-            return new HttpRequest(HttpMethod.Get, queryUrl, headers, username, password);
+            return new HttpRequest(HttpMethod.GET, queryUrl, headers, username, password);
         }
 
         public HttpRequest Get(string queryUrl)
         {
-            return new HttpRequest(HttpMethod.Get,queryUrl);
+            return new HttpRequest(HttpMethod.GET,queryUrl);
         }
 
         public HttpRequest Post(string queryUrl)
         {
-            return new HttpRequest(HttpMethod.Post, queryUrl);
+            return new HttpRequest(HttpMethod.POST, queryUrl);
         }
 
         public HttpRequest Put(string queryUrl)
         {
-            return new HttpRequest(HttpMethod.Put, queryUrl);
+            return new HttpRequest(HttpMethod.PUT, queryUrl);
         }
 
         public HttpRequest Delete(string queryUrl)
         {
-            return new HttpRequest(HttpMethod.Delete, queryUrl);
+            return new HttpRequest(HttpMethod.DELETE, queryUrl);
         }
 
         public HttpRequest Patch(string queryUrl)
         {
-            return new HttpRequest(HttpMethod.Patch, queryUrl);
+            return new HttpRequest(HttpMethod.PATCH, queryUrl);
         }
 
         public HttpRequest Post(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
             string password = null)
         {
-            return new HttpRequest(HttpMethod.Post, queryUrl, headers,formParameters, username, password);
+            return new HttpRequest(HttpMethod.POST, queryUrl, headers,formParameters, username, password);
         }
 
         public HttpRequest PostBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
         {
-            return new HttpRequest(HttpMethod.Post, queryUrl, headers, body, username, password);
+            return new HttpRequest(HttpMethod.POST, queryUrl, headers, body, username, password);
         }
 
         public HttpRequest Put(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
             string password = null)
         {
-            return new HttpRequest(HttpMethod.Put, queryUrl, headers, formParameters, username, password);
+            return new HttpRequest(HttpMethod.PUT, queryUrl, headers, formParameters, username, password);
         }
 
         public HttpRequest PutBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
         {
-            return new HttpRequest(HttpMethod.Put, queryUrl, headers, body, username, password);
+            return new HttpRequest(HttpMethod.PUT, queryUrl, headers, body, username, password);
         }
 
         public HttpRequest Patch(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
             string password = null)
         {
-            return new HttpRequest(HttpMethod.Patch, queryUrl, headers, formParameters, username, password);
+            return new HttpRequest(HttpMethod.PATCH, queryUrl, headers, formParameters, username, password);
         }
 
         public HttpRequest PatchBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
         {
-            return new HttpRequest(HttpMethod.Patch, queryUrl, headers, body, username, password);
+            return new HttpRequest(HttpMethod.PATCH, queryUrl, headers, body, username, password);
         }
 
         public HttpRequest Delete(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
             string password = null)
         {
-            return new HttpRequest(HttpMethod.Delete, queryUrl, headers, formParameters, username, password);
+            return new HttpRequest(HttpMethod.DELETE, queryUrl, headers, formParameters, username, password);
         }
 
         public HttpRequest DeleteBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
         {
-            return new HttpRequest(HttpMethod.Delete, queryUrl, headers, body, username, password);
+            return new HttpRequest(HttpMethod.DELETE, queryUrl, headers, body, username, password);
         }
     }
 }

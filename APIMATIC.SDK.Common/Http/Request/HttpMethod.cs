@@ -26,10 +26,10 @@ namespace APIMATIC.SDK.Http.Request
 {
     public enum HttpMethod
     {
-        Get,
-        Post,
-        Put,
-        Patch,
-        Delete
+        GET,
+        POST,
+        PUT,
+        PATCH,
+        DELETE
     }
 }

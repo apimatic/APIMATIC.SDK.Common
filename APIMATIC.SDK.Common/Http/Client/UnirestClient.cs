@@ -43,6 +43,147 @@ namespace APIMATIC.SDK.Http.Client
             SharedClient = new UnirestClient();
         }
 
+        #region Execute methods
+
+        public HttpResponse ExecuteAsString(HttpRequest request)
+        {
+            //raise the on before request event
+            raiseOnBeforeHttpRequestEvent(request);
+
+            UniHttpRequest uniRequest = ConvertRequest(request);
+            HttpResponse response = ConvertResponse(uniRequest.asString());
+
+            //raise the on after response event
+            raiseOnAfterHttpResponseEvent(response);
+            return response;
+        }
+
+        public Task<HttpResponse> ExecuteAsStringAsync(HttpRequest request)
+        {
+            return Task.Factory.StartNew(() => ExecuteAsString(request));
+        }
+
+        public HttpResponse ExecuteAsBinary(HttpRequest request)
+        {
+            //raise the on before request event
+            raiseOnBeforeHttpRequestEvent(request);
+
+            UniHttpRequest uniRequest = ConvertRequest(request);
+            HttpResponse response = ConvertResponse(uniRequest.asBinary());
+
+            //raise the on after response event
+            raiseOnAfterHttpResponseEvent(response);
+            return response;
+        }
+
+        public Task<HttpResponse> ExecuteAsBinaryAsync(HttpRequest request)
+        {
+            return Task.Factory.StartNew(() => ExecuteAsString(request));
+        }
+
+        #endregion
+
+
+        #region Http request and response events
+
+        public event OnBeforeHttpRequestEventHandler OnBeforeHttpRequestEvent;
+        public event OnAfterHttpResponseEventHandler OnAfterHttpResponseEvent;
+
+        private void raiseOnBeforeHttpRequestEvent(HttpRequest request)
+        {
+            if ((null != OnBeforeHttpRequestEvent) && (null != request))
+                OnBeforeHttpRequestEvent(this, request);
+        }
+
+        private void raiseOnAfterHttpResponseEvent(HttpResponse response)
+        {
+            if ((null != OnAfterHttpResponseEvent) && (null != response))
+                OnAfterHttpResponseEvent(this, response);
+        }
+
+        #endregion
+
+
+        #region Http methods
+
+        public HttpRequest Get(string queryUrl, Dictionary<string, string> headers, string username = null, string password = null)
+        {
+            return new HttpRequest(HttpMethod.GET, queryUrl, headers, username, password);
+        }
+
+        public HttpRequest Get(string queryUrl)
+        {
+            return new HttpRequest(HttpMethod.GET, queryUrl);
+        }
+
+        public HttpRequest Post(string queryUrl)
+        {
+            return new HttpRequest(HttpMethod.POST, queryUrl);
+        }
+
+        public HttpRequest Put(string queryUrl)
+        {
+            return new HttpRequest(HttpMethod.PUT, queryUrl);
+        }
+
+        public HttpRequest Delete(string queryUrl)
+        {
+            return new HttpRequest(HttpMethod.DELETE, queryUrl);
+        }
+
+        public HttpRequest Patch(string queryUrl)
+        {
+            return new HttpRequest(HttpMethod.PATCH, queryUrl);
+        }
+
+        public HttpRequest Post(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
+            string password = null)
+        {
+            return new HttpRequest(HttpMethod.POST, queryUrl, headers, formParameters, username, password);
+        }
+
+        public HttpRequest PostBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
+        {
+            return new HttpRequest(HttpMethod.POST, queryUrl, headers, body, username, password);
+        }
+
+        public HttpRequest Put(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
+            string password = null)
+        {
+            return new HttpRequest(HttpMethod.PUT, queryUrl, headers, formParameters, username, password);
+        }
+
+        public HttpRequest PutBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
+        {
+            return new HttpRequest(HttpMethod.PUT, queryUrl, headers, body, username, password);
+        }
+
+        public HttpRequest Patch(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
+            string password = null)
+        {
+            return new HttpRequest(HttpMethod.PATCH, queryUrl, headers, formParameters, username, password);
+        }
+
+        public HttpRequest PatchBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
+        {
+            return new HttpRequest(HttpMethod.PATCH, queryUrl, headers, body, username, password);
+        }
+
+        public HttpRequest Delete(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
+            string password = null)
+        {
+            return new HttpRequest(HttpMethod.DELETE, queryUrl, headers, formParameters, username, password);
+        }
+
+        public HttpRequest DeleteBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
+        {
+            return new HttpRequest(HttpMethod.DELETE, queryUrl, headers, body, username, password);
+        }
+
+        #endregion
+
+        #region Helper methods
+
         private static UniHttpMethod ConvertHttpMethod(HttpMethod method)
         {
             switch (method)
@@ -76,14 +217,14 @@ namespace APIMATIC.SDK.Http.Client
             {
                 if (request.FormParameters.Any(p => p.Value is Stream || p.Value is FileStreamInfo))
                 {
-					//multipart
+                    //multipart
                     foreach (var kvp in request.FormParameters)
                     {
-						if (kvp.Value is FileStreamInfo){
-							var fileInfo = (FileStreamInfo) kvp.Value;
-							uniRequest.field(kvp.Key,fileInfo.FileStream);
-							continue;
-						}
+                        if (kvp.Value is FileStreamInfo){
+                            var fileInfo = (FileStreamInfo) kvp.Value;
+                            uniRequest.field(kvp.Key,fileInfo.FileStream);
+                            continue;
+                        }
                         uniRequest.field(kvp.Key,kvp.Value);
                     }
                 }
@@ -132,100 +273,6 @@ namespace APIMATIC.SDK.Http.Client
             };
         }
 
-        public HttpResponse ExecuteAsString(HttpRequest request)
-        {
-            UniHttpRequest uniRequest = ConvertRequest(request);
-            return ConvertResponse(uniRequest.asString());
-        }
-
-        public Task<HttpResponse> ExecuteAsStringAsync(HttpRequest request)
-        {
-            return Task.Factory.StartNew(() => ExecuteAsString(request));
-        }
-
-        public HttpResponse ExecuteAsBinary(HttpRequest request)
-        {
-            UniHttpRequest uniRequest = ConvertRequest(request);
-            return ConvertResponse(uniRequest.asBinary());
-        }
-
-        public Task<HttpResponse> ExecuteAsBinaryAsync(HttpRequest request)
-        {
-            return Task.Factory.StartNew(() => ExecuteAsString(request));
-        }
-        
-        public HttpRequest Get(string queryUrl, Dictionary<string, string> headers, string username = null, string password = null)
-        {
-            return new HttpRequest(HttpMethod.GET, queryUrl, headers, username, password);
-        }
-
-        public HttpRequest Get(string queryUrl)
-        {
-            return new HttpRequest(HttpMethod.GET,queryUrl);
-        }
-
-        public HttpRequest Post(string queryUrl)
-        {
-            return new HttpRequest(HttpMethod.POST, queryUrl);
-        }
-
-        public HttpRequest Put(string queryUrl)
-        {
-            return new HttpRequest(HttpMethod.PUT, queryUrl);
-        }
-
-        public HttpRequest Delete(string queryUrl)
-        {
-            return new HttpRequest(HttpMethod.DELETE, queryUrl);
-        }
-
-        public HttpRequest Patch(string queryUrl)
-        {
-            return new HttpRequest(HttpMethod.PATCH, queryUrl);
-        }
-
-        public HttpRequest Post(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
-            string password = null)
-        {
-            return new HttpRequest(HttpMethod.POST, queryUrl, headers,formParameters, username, password);
-        }
-
-        public HttpRequest PostBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
-        {
-            return new HttpRequest(HttpMethod.POST, queryUrl, headers, body, username, password);
-        }
-
-        public HttpRequest Put(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
-            string password = null)
-        {
-            return new HttpRequest(HttpMethod.PUT, queryUrl, headers, formParameters, username, password);
-        }
-
-        public HttpRequest PutBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
-        {
-            return new HttpRequest(HttpMethod.PUT, queryUrl, headers, body, username, password);
-        }
-
-        public HttpRequest Patch(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
-            string password = null)
-        {
-            return new HttpRequest(HttpMethod.PATCH, queryUrl, headers, formParameters, username, password);
-        }
-
-        public HttpRequest PatchBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
-        {
-            return new HttpRequest(HttpMethod.PATCH, queryUrl, headers, body, username, password);
-        }
-
-        public HttpRequest Delete(string queryUrl, Dictionary<string, string> headers, Dictionary<string, object> formParameters, string username = null,
-            string password = null)
-        {
-            return new HttpRequest(HttpMethod.DELETE, queryUrl, headers, formParameters, username, password);
-        }
-
-        public HttpRequest DeleteBody(string queryUrl, Dictionary<string, string> headers, string body, string username = null, string password = null)
-        {
-            return new HttpRequest(HttpMethod.DELETE, queryUrl, headers, body, username, password);
-        }
+        #endregion
     }
 }

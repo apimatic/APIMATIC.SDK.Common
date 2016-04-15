@@ -45,6 +45,7 @@
     <Compile Include="Common\APIHelper.cs" />
     <Compile Include="Http\Client\FileStreamInfo.cs" />
     <Compile Include="Http\Client\HttpContext.cs" />
+    <Compile Include="Http\Client\HttpEventHandlers.cs" />
     <Compile Include="Http\Client\IHTTPClient.cs" />
     <Compile Include="Http\Client\UnirestClient.cs" />
     <Compile Include="Http\Request\HttpMethod.cs" />

@@ -280,13 +280,26 @@ namespace APIMATIC.SDK.Common
                     i++;
                 }
             }
-			else if (value is Enum)
+            else if (value is Enum)
             {
-                var isStringEnum = value.GetType().GetCustomAttributes(false).FirstOrDefault(a => a is JsonConverterAttribute)!=null;
-                if (isStringEnum) value = JsonConvert.SerializeObject(value).Trim('"');
-                else value = (int)value;
-                keys[name] = value;
+#if WINDOWS_UWP
+                Assembly thisAssembly = typeof(APIHelper).GetTypeInfo().Assembly;
+#else
+                Assembly thisAssembly = typeof(APIHelper).Assembly;
+#endif
+                string enumTypeName = value.GetType().FullName;
+                Type enumHelperType = thisAssembly.GetType(string.Format("{0}Helper", enumTypeName));
+                object enumValue = (int)value;
 
+                if (enumHelperType != null)
+                {
+                    //this enum has an associated helper, use that to load the value
+                    MethodInfo enumHelperMethod = enumHelperType.GetMethod("ToValue", new[] { value.GetType() });
+                    if (enumHelperMethod != null)
+                        enumValue = enumHelperMethod.Invoke(null, new object[] { value });
+                }
+
+                keys[name] = enumValue;
             }
             else if (value is IDictionary)
             {

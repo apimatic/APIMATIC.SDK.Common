@@ -285,7 +285,7 @@ namespace APIMATIC.SDK.Common
 #if WINDOWS_UWP
                 Assembly thisAssembly = typeof(APIHelper).GetTypeInfo().Assembly;
 #else
-                Assembly thisAssembly = typeof(APIHelper).Assembly;
+                Assembly thisAssembly = Assembly.GetExecutingAssembly();
 #endif
                 string enumTypeName = value.GetType().FullName;
                 Type enumHelperType = thisAssembly.GetType(string.Format("{0}Helper", enumTypeName));

@@ -127,7 +127,7 @@
     <VisualStudioVersion>14.0</VisualStudioVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>unirest-net</AssemblyName>
+    <AssemblyName>APIMATIC.SDK.Common</AssemblyName>
   </PropertyGroup>
   <PropertyGroup>
     <SignAssembly>false</SignAssembly>

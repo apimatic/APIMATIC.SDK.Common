@@ -194,3 +194,7 @@ FakesAssemblies/
 
 # Visual Studio 6 workspace options file
 *.opt
+/apimatic.sdk.common.1.0.0.2 - Copy.zip
+/APIMATIC.SDK.Common/project.lock.json
+/APIMATIC.SDK.Common/APIMATIC.SDK.Common.nuget.targets
+/APIMATIC.SDK.Common/APIMATIC.SDK.Common-UWP.nuget.targets

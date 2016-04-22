@@ -92,6 +92,6 @@
   },
   "dependencies": {
     "newtonsoft.json": "8.0.3",
-    "unirest-apimatic": "1.0.0.12"
+    "unirest-apimatic": "1.0.1.7"
   }
 }

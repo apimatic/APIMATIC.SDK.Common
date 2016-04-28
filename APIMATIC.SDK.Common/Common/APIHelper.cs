@@ -30,6 +30,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 
 namespace APIMATIC.SDK.Common
@@ -347,6 +349,18 @@ namespace APIMATIC.SDK.Common
             {
                 dictionary[kvp.Key] = kvp.Value;
             }
+        }
+
+        /// <summary>
+        /// Executes a given async task synchronously using a background thread
+        /// </summary>
+        /// <param name="task">The task to run synchronoulsy in a background thread</param>
+        public static T RunTaskSynchronously<T>(this Task<T> t)
+        {
+            T res = default(T);
+            var task = Task.Factory.StartNew(async () => res = await t);
+            task.Wait();
+            return res;
         }
     }
 }

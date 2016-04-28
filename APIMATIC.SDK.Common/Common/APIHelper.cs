@@ -358,7 +358,7 @@ namespace APIMATIC.SDK.Common
         public static T RunTaskSynchronously<T>(this Task<T> t)
         {
             T res = default(T);
-            var task = Task.Factory.StartNew(async () => res = await t);
+            var task = Task.Factory.StartNew(async () => { res = await t; }).Unwrap();
             task.Wait();
             return res;
         }

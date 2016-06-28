@@ -302,7 +302,7 @@ namespace APIMATIC.SDK.Common
             }
             else if (value is Enum)
             {
-#if WINDOWS_UWP
+#if WINDOWS_UWP || DNXCORE50
                 Assembly thisAssembly = typeof(APIHelper).GetTypeInfo().Assembly;
 #else
                 Assembly thisAssembly = Assembly.GetExecutingAssembly();

@@ -38,11 +38,11 @@
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
     <None Include="app.config" />
-    <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\APIException.cs" />
     <Compile Include="Common\APIHelper.cs" />
+    <Compile Include="Common\StringValuedEnumConverter.cs" />
     <Compile Include="Http\Client\FileStreamInfo.cs" />
     <Compile Include="Http\Client\HttpContext.cs" />
     <Compile Include="Http\Client\HttpEventHandlers.cs" />

@@ -58,4 +58,6 @@ namespace APIMATIC.SDK.Http.Client
             FileName = fileName;
             ContentType = contentType;
         }
+
     }
+}

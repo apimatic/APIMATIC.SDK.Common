@@ -222,7 +222,7 @@ namespace APIMATIC.SDK.Http.Client
                     {
                         if (kvp.Value is FileStreamInfo){
                             var fileInfo = (FileStreamInfo) kvp.Value;
-                            uniRequest.field(kvp.Key,fileInfo.FileStream);
+                            uniRequest.field(kvp.Key,fileInfo.FileStream, fileInfo.FileName, fileInfo.ContentType);
                             continue;
                         }
                         uniRequest.field(kvp.Key,kvp.Value);

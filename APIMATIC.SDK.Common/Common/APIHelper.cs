@@ -147,9 +147,9 @@ namespace APIMATIC.SDK.Common
                 if (pair.Value is ICollection)
                     paramKeyValPair = flattenCollection(pair.Value as ICollection, string.Format("{0}[]={{0}}{{1}}", pair.Key), '&', true);
                 else if (pair.Value is DateTime)
-                    paramKeyValPair = string.Format("{0}={1}", Uri.EscapeUriString(pair.Key), ((DateTime)pair.Value).ToString(DateTimeFormat));
+                    paramKeyValPair = string.Format("{0}={1}", Uri.EscapeDataString(pair.Key), ((DateTime)pair.Value).ToString(DateTimeFormat));
                 else
-                    paramKeyValPair = string.Format("{0}={1}", Uri.EscapeUriString(pair.Key), Uri.EscapeUriString(pair.Value.ToString()));
+                    paramKeyValPair = string.Format("{0}={1}", Uri.EscapeDataString(pair.Key), Uri.EscapeDataString(pair.Value.ToString()));
 
                 //append keyval pair for current parameter
                 queryBuilder.Append(paramKeyValPair);
@@ -202,16 +202,19 @@ namespace APIMATIC.SDK.Common
             string url = queryBuilder.ToString();
 
             //ensure that the urls are absolute
-            Match protocol = Regex.Match(url, "^https?://[^/]+");
-            if (!protocol.Success)
+            Match match = Regex.Match(url, "^https?://[^/]+");
+            if (!match.Success)
                 throw new ArgumentException("Invalid Url format.");
 
             //remove redundant forward slashes
-            string query = url.Substring(protocol.Length);
+            int index = url.IndexOf('?');
+            string protocol = match.Value;
+            string query = url.Substring(protocol.Length, (index == -1 ? url.Length : index) - protocol.Length);
             query = Regex.Replace(query, "//+", "/");
+            string parameters = index == -1 ? "" : url.Substring(index);
 
             //return process url
-            return string.Concat(protocol.Value, query);
+            return string.Concat(protocol, query, parameters); ;
         }
 
         /// <summary>
@@ -303,12 +306,13 @@ namespace APIMATIC.SDK.Common
             else if (value is Enum)
             {
 #if WINDOWS_UWP || DNXCORE50
-                Assembly thisAssembly = typeof(APIHelper).GetTypeInfo().Assembly;
+                Assembly thisAssembly = value.GetType().GetTypeInfo().Assembly;
 #else
-                Assembly thisAssembly = Assembly.GetExecutingAssembly();
+                Assembly thisAssembly = value.GetType().Assembly;
 #endif
                 string enumTypeName = value.GetType().FullName;
                 Type enumHelperType = thisAssembly.GetType(string.Format("{0}Helper", enumTypeName));
+               
                 object enumValue = (int)value;
 
                 if (enumHelperType != null)

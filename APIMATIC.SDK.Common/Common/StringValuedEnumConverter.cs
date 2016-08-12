@@ -97,9 +97,16 @@ namespace APIMATIC.SDK.Common
         /// <returns>Type of the helper class for the given enum type</returns>
         private static Type loadEnumHelperType(Type enumType)
         {
+
+#if WINDOWS_UWP || DNXCORE50
+            bool isNullableGeneric = enumType.GetTypeInfo().IsGenericType && enumType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            Assembly assembly = enumType.GetTypeInfo().Assembly;
+
+#else
             bool isNullableGeneric = enumType.IsGenericType && enumType.GetGenericTypeDefinition() == typeof(Nullable<>);
+            Assembly assembly = enumType.Assembly;
+#endif
             string enumHelperClassName = string.Format("{0}Helper", isNullableGeneric ? Nullable.GetUnderlyingType(enumType).FullName : enumType.FullName);
-            Assembly assembly = typeof(StringValuedEnumConverter).Assembly;
             Type enumHelperType = assembly.GetType(enumHelperClassName);
 
             if (enumHelperType == null)
@@ -153,9 +160,11 @@ namespace APIMATIC.SDK.Common
             Type[] genericArgs = objectType.GetGenericArguments();
             if ((genericArgs != null) && (genericArgs.Length > 0))
                 toCheck = genericArgs[genericArgs.Length - 1];
-
+#if WINDOWS_UWP || DNXCORE50
+            var attributes = toCheck.GetTypeInfo().GetCustomAttributes(typeof(JsonConverterAttribute), false);
+#else
             var attributes = toCheck.GetCustomAttributes(typeof(JsonConverterAttribute), false);
-
+#endif
             if ((attributes == null))
                 return false;
 

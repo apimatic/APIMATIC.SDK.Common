@@ -33,6 +33,11 @@ namespace APIMATIC.SDK.Http.Client
     public interface IHttpClient
     {
         /// <summary>
+        /// Sets the time to wait before the request times out.
+        ///<param name="Timeout"> A timepsan object specifying the time to wait</param>
+        ///
+        void setTimeout(TimeSpan Timeout);
+        /// <summary>
         /// Event raised before an Http request is sent over the network
         /// This event can be used for logging, request modification, appending
         /// additional headers etc.

@@ -23,10 +23,13 @@ SOFTWARE.
 *****************************************************************************/
 
 using System;
+using System.IO;
 using APIMATIC.SDK.Http.Client;
+using Newtonsoft.Json;
 
 namespace APIMATIC.SDK.Common
 {
+    [JsonObject]
     public class APIException : Exception
     {
         /// <summary>
@@ -51,6 +54,22 @@ namespace APIMATIC.SDK.Common
             : base(reason)
         {
             this.HttpContext = context;
+            //if a derived exception class is used, then perform deserialization of response body
+            if ((this.GetType().Name.Equals("APIException", StringComparison.OrdinalIgnoreCase))
+                || (context == null) || (context.Response == null)
+                || (context.Response.RawBody == null)
+                || (!context.Response.RawBody.CanRead))
+                return;
+
+            using (StreamReader reader = new StreamReader(context.Response.RawBody))
+            {
+                var responseBody = reader.ReadToEnd();
+                if (!string.IsNullOrWhiteSpace(responseBody))
+                {
+                    try { JsonConvert.PopulateObject(responseBody, this); }
+                    catch { } //ignoring response body from deserailization
+                }
+            }
         }
     }
 }

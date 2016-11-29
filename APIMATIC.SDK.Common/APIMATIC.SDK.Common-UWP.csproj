@@ -109,7 +109,9 @@
   <ItemGroup>
     <Compile Include="Common\APIException.cs" />
     <Compile Include="Common\APIHelper.cs" />
+    <Compile Include="Common\CustomDateTimeConverter.cs" />
     <Compile Include="Common\StringValuedEnumConverter.cs" />
+    <Compile Include="Common\UnixDateTimeConverter.cs" />
     <Compile Include="Http\Client\FileStreamInfo.cs" />
     <Compile Include="Http\Client\HttpContext.cs" />
     <Compile Include="Http\Client\HttpEventHandlers.cs" />

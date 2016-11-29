@@ -6,7 +6,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace APIMATIC.SDK.Common.Common
+namespace APIMATIC.SDK.Common
 {
     public class UnixDateTimeConverter : DateTimeConverterBase
     {

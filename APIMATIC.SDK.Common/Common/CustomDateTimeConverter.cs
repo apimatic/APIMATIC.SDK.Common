@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Newtonsoft.Json.Converters;
 
-namespace APIMATIC.SDK.Common.Common
+namespace APIMATIC.SDK.Common
 {
     public class CustomDateTimeConverter : IsoDateTimeConverter
     {

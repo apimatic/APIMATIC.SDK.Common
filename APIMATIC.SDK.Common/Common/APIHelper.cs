@@ -48,29 +48,33 @@ namespace APIMATIC.SDK.Common
         /// JSON Serialization of a given object.
         /// </summary>
         /// <param name="obj">The object to serialize into JSON</param>
+        /// <param name="converter">The converter to use for date time conversion</param>
         /// <returns>The serialized Json string representation of the given object</returns>
-        public static string JsonSerialize(object obj)
+        public static string JsonSerialize(object obj, JsonConverter converter = null)
         {
             if (null == obj)
                 return null;
-
-            return JsonConvert.SerializeObject(obj, Formatting.None,
-                 new IsoDateTimeConverter() { DateTimeFormat = DateTimeFormat });
+            if (converter == null)
+                return JsonConvert.SerializeObject(obj, Formatting.None, new IsoDateTimeConverter());
+            else
+                return JsonConvert.SerializeObject(obj, Formatting.None, converter);
         }
 
         /// <summary>
         /// JSON Deserialization of the given json string.
         /// </summary>
         /// <param name="json">The json string to deserialize</param>
+        /// <param name="converter">The converter to use for date time conversion</param>
         /// <typeparam name="T">The type of the object to desialize into</typeparam>
         /// <returns>The deserialized object</returns>
-        public static T JsonDeserialize<T>(string json)
+        public static T JsonDeserialize<T>(string json, JsonConverter converter = null)
         {
             if (string.IsNullOrWhiteSpace(json))
                 return default(T);
-
-            return JsonConvert.DeserializeObject<T>(json,
-                 new IsoDateTimeConverter() { DateTimeFormat = DateTimeFormat });
+            if (converter == null)
+                return JsonConvert.DeserializeObject<T>(json, new IsoDateTimeConverter());
+            else
+                return JsonConvert.DeserializeObject<T>(json, converter);
         }
 
         /// <summary>

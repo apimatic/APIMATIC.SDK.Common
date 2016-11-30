@@ -309,10 +309,10 @@ namespace APIMATIC.SDK.Common
             }
             else if (value is Enum)
             {
-#if WINDOWS_UWP
-                Assembly thisAssembly = typeof(APIHelper).GetTypeInfo().Assembly;
+#if WINDOWS_UWP || DNXCORE50
+                Assembly thisAssembly = value.GetType().GetTypeInfo().Assembly;
 #else
-                Assembly thisAssembly = Assembly.GetExecutingAssembly();
+                Assembly thisAssembly = value.GetType().Assembly;
 #endif
                 string enumTypeName = value.GetType().FullName;
                 Type enumHelperType = thisAssembly.GetType(string.Format("{0}Helper", enumTypeName));

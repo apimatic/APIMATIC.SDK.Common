@@ -266,7 +266,7 @@ namespace APIMATIC.SDK.Common
         /// <param name="keys">Contains a flattend and form friendly values</param>
         /// <returns>Contains a flattend and form friendly values</returns>
         public static Dictionary<string, object> PrepareFormFieldsFromObject(
-            string name, object value, Dictionary<string, object> keys = null)
+            string name, object value, Dictionary<string, object> keys = null, PropertyInfo propInfo = null)
         {
             keys = keys ?? new Dictionary<string, object>();
 
@@ -287,7 +287,7 @@ namespace APIMATIC.SDK.Common
                     string pKey = property.Name;
                     object pValue = property.Value;
                     var fullSubName = name + '[' + pKey + ']';
-                    PrepareFormFieldsFromObject(fullSubName, pValue, keys);
+                    PrepareFormFieldsFromObject(fullSubName, pValue, keys, propInfo);
                 }
             }
             else if (value is IList)
@@ -299,7 +299,7 @@ namespace APIMATIC.SDK.Common
                     var subValue = enumerator.Current;
                     if (subValue == null) continue;
                     var fullSubName = name + '[' + i + ']';
-                    PrepareFormFieldsFromObject(fullSubName, subValue, keys);
+                    PrepareFormFieldsFromObject(fullSubName, subValue, keys, propInfo);
                     i++;
                 }
             }
@@ -309,14 +309,13 @@ namespace APIMATIC.SDK.Common
             }
             else if (value is Enum)
             {
-#if WINDOWS_UWP || DNXCORE50
-                Assembly thisAssembly = value.GetType().GetTypeInfo().Assembly;
+#if WINDOWS_UWP
+                Assembly thisAssembly = typeof(APIHelper).GetTypeInfo().Assembly;
 #else
-                Assembly thisAssembly = value.GetType().Assembly;
+                Assembly thisAssembly = Assembly.GetExecutingAssembly();
 #endif
                 string enumTypeName = value.GetType().FullName;
                 Type enumHelperType = thisAssembly.GetType(string.Format("{0}Helper", enumTypeName));
-               
                 object enumValue = (int)value;
 
                 if (enumHelperType != null)
@@ -337,7 +336,7 @@ namespace APIMATIC.SDK.Common
                     var subName = sName.ToString();
                     var subValue = obj[subName];
                     string fullSubName = string.IsNullOrWhiteSpace(name) ? subName : name + '[' + subName + ']';
-                    PrepareFormFieldsFromObject(fullSubName, subValue, keys);
+                    PrepareFormFieldsFromObject(fullSubName, subValue, keys, propInfo);
                 }
             }
             else if (!(value.GetType().Namespace.StartsWith("System")))
@@ -354,12 +353,23 @@ namespace APIMATIC.SDK.Common
                     var subName = (jsonProperty != null) ? jsonProperty.PropertyName : pInfo.Name;
                     string fullSubName = string.IsNullOrWhiteSpace(name) ? subName : name + '[' + subName + ']';
                     var subValue = pInfo.GetValue(value, null);
-                    PrepareFormFieldsFromObject(fullSubName, subValue, keys);
+                    PrepareFormFieldsFromObject(fullSubName, subValue, keys, pInfo);
                 }
             }
             else if (value is DateTime)
             {
-                keys[name] = ((DateTime)value).ToString(DateTimeFormat);
+                string convertedValue = null;
+                var pInfo = propInfo?.GetCustomAttributes(true);
+                if (pInfo != null)
+                {
+                    foreach (object attr in pInfo)
+                    {
+                        JsonConverterAttribute converterAttr = attr as JsonConverterAttribute;
+                        if (converterAttr != null)
+                            convertedValue = JsonSerialize(value, (JsonConverter)Activator.CreateInstance(converterAttr.ConverterType, converterAttr.ConverterParameters)).Replace("\"", "");
+                    }
+                }
+                keys[name] = (convertedValue) ?? ((DateTime)value).ToString(DateTimeFormat);
             }
             else
             {

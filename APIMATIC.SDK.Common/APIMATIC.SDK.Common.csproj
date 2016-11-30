@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="Common\APIException.cs" />
     <Compile Include="Common\CustomDateTimeConverter.cs" />
+    <Compile Include="Common\ListDateTimeConverter.cs" />
     <Compile Include="Common\StringValuedEnumConverter.cs" />
     <Compile Include="Common\APIHelper.cs" />
     <Compile Include="Common\UnixDateTimeConverter.cs" />

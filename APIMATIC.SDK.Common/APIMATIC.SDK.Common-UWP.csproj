@@ -111,6 +111,7 @@
     <Compile Include="Common\APIHelper.cs" />
     <Compile Include="Common\CustomDateTimeConverter.cs" />
     <Compile Include="Common\ListDateTimeConverter.cs" />
+    <Compile Include="Common\RetryHelper.cs" />
     <Compile Include="Common\StringValuedEnumConverter.cs" />
     <Compile Include="Common\UnixDateTimeConverter.cs" />
     <Compile Include="Http\Client\FileStreamInfo.cs" />

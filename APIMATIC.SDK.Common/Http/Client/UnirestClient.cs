@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using APIMATIC.SDK.Common;
 using APIMATIC.SDK.Http.Request;
 using APIMATIC.SDK.Http.Response;
 using unirest_net.http;
@@ -38,6 +39,8 @@ namespace APIMATIC.SDK.Http.Client
     public class UnirestClient: IHttpClient
     {
         public static IHttpClient SharedClient { get; set; }
+        public TimeSpan RetryInterval { get; set; } = TimeSpan.Zero;
+        public int Retries { get; set; } = 0;
 
         static UnirestClient() {
             SharedClient = new UnirestClient();
@@ -63,9 +66,21 @@ namespace APIMATIC.SDK.Http.Client
             return response;
         }
 
-        public Task<HttpResponse> ExecuteAsStringAsync(HttpRequest request)
+        public async Task<HttpResponse> ExecuteAsStringAsync(HttpRequest request)
         {
-            return Task.Factory.StartNew(() => ExecuteAsString(request));
+            HttpResponse task = null;
+            if (request.HttpMethod == HttpMethod.GET)
+            {
+                await RetryHelper.RetryOnExceptionAsync(Retries, RetryInterval, async () =>
+                {
+                    task = await Task.Factory.StartNew(() => ExecuteAsString(request));
+                });
+            }
+            else
+            {
+                task = await Task.Factory.StartNew(() => ExecuteAsString(request));
+            }
+            return task;
         }
 
         public HttpResponse ExecuteAsBinary(HttpRequest request)
@@ -81,9 +96,21 @@ namespace APIMATIC.SDK.Http.Client
             return response;
         }
 
-        public Task<HttpResponse> ExecuteAsBinaryAsync(HttpRequest request)
+        public async Task<HttpResponse> ExecuteAsBinaryAsync(HttpRequest request)
         {
-            return Task.Factory.StartNew(() => ExecuteAsString(request));
+            HttpResponse task = null;
+            if (request.HttpMethod == HttpMethod.GET)
+            {
+                await RetryHelper.RetryOnExceptionAsync(Retries, RetryInterval, async () =>
+                {
+                    task = await Task.Factory.StartNew(() => ExecuteAsString(request));
+                });
+            }
+            else
+            {
+                task = await Task.Factory.StartNew(() => ExecuteAsString(request));
+            }
+            return task;
         }
 
         #endregion

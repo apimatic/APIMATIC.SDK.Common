@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\APIException.cs" />
+    <Compile Include="Common\ArrayDeserialization.cs" />
     <Compile Include="Common\CustomDateTimeConverter.cs" />
     <Compile Include="Common\ListDateTimeConverter.cs" />
     <Compile Include="Common\RetryHelper.cs" />

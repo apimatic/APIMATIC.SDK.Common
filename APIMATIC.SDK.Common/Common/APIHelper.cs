@@ -32,10 +32,10 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using APIMATIC.SDK.Common.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using unirest_net.request;
 
 namespace APIMATIC.SDK.Common
 {
@@ -101,7 +101,7 @@ namespace APIMATIC.SDK.Common
                 if (null == pair.Value)
                     replaceValue = "";
                 else if (pair.Value is ICollection)
-                    replaceValue = flattenCollection(pair.Value as ICollection, "{0}{1}", '/', false);
+                    replaceValue = flattenCollection(pair.Value as ICollection, ArrayDeserialization.None, '/', false);
                 else if (pair.Value is DateTime)
                     replaceValue = ((DateTime)pair.Value).ToString(DateTimeFormat);
                 else
@@ -110,7 +110,7 @@ namespace APIMATIC.SDK.Common
                 replaceValue = Uri.EscapeUriString(replaceValue);
 
                 //find the template parameter and replace it with its value
-                queryBuilder.Replace(string.Format("{{{0}}}", pair.Key), replaceValue);
+                queryBuilder.Replace($"{{{pair.Key}}}", replaceValue);
             }
         }
 
@@ -120,7 +120,7 @@ namespace APIMATIC.SDK.Common
         /// <param name="queryUrl">The query url string to append the parameters</param>
         /// <param name="parameters">The parameters to append</param>
         public static void AppendUrlWithQueryParameters
-            (StringBuilder queryBuilder, IEnumerable<KeyValuePair<string, object>> parameters)
+            (StringBuilder queryBuilder, IEnumerable<KeyValuePair<string, object>> parameters, ArrayDeserialization arrayDeserializationFormat = ArrayDeserialization.UnIndexed, char separator = '&')
         {
             //perform parameter validation
             if (null == queryBuilder)
@@ -149,11 +149,13 @@ namespace APIMATIC.SDK.Common
 
                 //load element value as string
                 if (pair.Value is ICollection)
-                    paramKeyValPair = flattenCollection(pair.Value as ICollection, string.Format("{0}[]={{0}}{{1}}", pair.Key), '&', true);
+                    paramKeyValPair = flattenCollection(pair.Value as ICollection, arrayDeserializationFormat, separator,
+                        true, pair.Key);
                 else if (pair.Value is DateTime)
-                    paramKeyValPair = string.Format("{0}={1}", Uri.EscapeDataString(pair.Key), ((DateTime)pair.Value).ToString(DateTimeFormat));
+                    paramKeyValPair =
+                        $"{Uri.EscapeDataString(pair.Key)}={((DateTime) pair.Value).ToString(DateTimeFormat)}";
                 else
-                    paramKeyValPair = string.Format("{0}={1}", Uri.EscapeDataString(pair.Key), Uri.EscapeDataString(pair.Value.ToString()));
+                    paramKeyValPair = $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value.ToString())}";
 
                 //append keyval pair for current parameter
                 queryBuilder.Append(paramKeyValPair);
@@ -228,34 +230,55 @@ namespace APIMATIC.SDK.Common
         /// <param name="fmt">Format string to use for array flattening</param>
         /// <param name="separator">Separator to use for string concat</param>
         /// <returns>Representative string made up of array elements</returns>
-        private static string flattenCollection(ICollection array, string fmt, char separator, bool urlEncode)
+        private static string flattenCollection(ICollection array, ArrayDeserialization fmt, char separator,
+            bool urlEncode, string key = "")
         {
             StringBuilder builder = new StringBuilder();
 
-            //append all elements in the array into a string
-            foreach (object element in array)
+            string format = string.Empty;
+            if (fmt == ArrayDeserialization.UnIndexed)
+                format = $"{key}[]={{0}}{{1}}";
+            else if (fmt == ArrayDeserialization.Indexed)
+                format = $"{key}[{{2}}]={{0}}{{1}}";
+            else if (fmt == ArrayDeserialization.Plain)
+                format = $"{key}={{0}}{{1}}";
+            else if (fmt == ArrayDeserialization.Csv || fmt == ArrayDeserialization.Psv ||
+                     fmt == ArrayDeserialization.Tsv)
             {
-                string elemValue = null;
-
-                //replace null values with empty string to maintain index order
-                if (null == element)
-                    elemValue = string.Empty;
-                else if (element is DateTime)
-                    elemValue = ((DateTime)element).ToString(DateTimeFormat);
-                else
-                    elemValue = element.ToString();
-
-                if (urlEncode)
-                    elemValue = Uri.EscapeUriString(elemValue);
-
-                builder.AppendFormat(fmt, elemValue, separator);
+                builder.Append($"{key}=");
+                format = "{0}{1}";
             }
+            else
+                format = "{0}{1}";
 
+            //append all elements in the array into a string
+            int index = 0;
+            foreach (object element in array)
+                builder.AppendFormat(format, getElementValue(element, urlEncode), separator, index++);
             //remove the last separator, if appended
             if ((builder.Length > 1) && (builder[builder.Length - 1] == separator))
                 builder.Length -= 1;
 
             return builder.ToString();
+        }
+
+        private static string getElementValue(object element, bool urlEncode)
+        {
+            string elemValue = null;
+
+            //replace null values with empty string to maintain index order
+            if (null == element)
+                elemValue = string.Empty;
+            else if (element is DateTime)
+                elemValue = ((DateTime)element).ToString(DateTimeFormat);
+            else if (element is DateTimeOffset)
+                elemValue = ((DateTimeOffset)element).ToString(DateTimeFormat);
+            else
+                elemValue = element.ToString();
+
+            if (urlEncode)
+                elemValue = Uri.EscapeDataString(elemValue);
+            return elemValue;
         }
 
         /// <summary>
@@ -264,9 +287,10 @@ namespace APIMATIC.SDK.Common
         /// <param name="name">root name for the variable</param>
         /// <param name="value">form field value</param>
         /// <param name="keys">Contains a flattend and form friendly values</param>
+        /// <param name="arrayDeserializationFormat">Format for deserializing array</param>
         /// <returns>Contains a flattend and form friendly values</returns>
         public static Dictionary<string, object> PrepareFormFieldsFromObject(
-            string name, object value, Dictionary<string, object> keys = null, PropertyInfo propInfo = null)
+            string name, object value, Dictionary<string, object> keys = null, PropertyInfo propInfo = null, ArrayDeserialization arrayDeserializationFormat = ArrayDeserialization.UnIndexed)
         {
             keys = keys ?? new Dictionary<string, object>();
 
@@ -287,7 +311,7 @@ namespace APIMATIC.SDK.Common
                     string pKey = property.Name;
                     object pValue = property.Value;
                     var fullSubName = name + '[' + pKey + ']';
-                    PrepareFormFieldsFromObject(fullSubName, pValue, keys, propInfo);
+                    PrepareFormFieldsFromObject(fullSubName, pValue, keys, propInfo, arrayDeserializationFormat);
                 }
             }
             else if (value is IList)
@@ -299,7 +323,11 @@ namespace APIMATIC.SDK.Common
                     var subValue = enumerator.Current;
                     if (subValue == null) continue;
                     var fullSubName = name + '[' + i + ']';
-                    PrepareFormFieldsFromObject(fullSubName, subValue, keys, propInfo);
+                    if (arrayDeserializationFormat == ArrayDeserialization.UnIndexed)
+                        fullSubName = name + "[]";
+                    else if (arrayDeserializationFormat == ArrayDeserialization.Plain)
+                        fullSubName = name;
+                    PrepareFormFieldsFromObject(fullSubName, subValue, keys, propInfo, arrayDeserializationFormat);
                     i++;
                 }
             }
@@ -315,7 +343,7 @@ namespace APIMATIC.SDK.Common
                 Assembly thisAssembly = value.GetType().Assembly;
 #endif
                 string enumTypeName = value.GetType().FullName;
-                Type enumHelperType = thisAssembly.GetType(string.Format("{0}Helper", enumTypeName));
+                Type enumHelperType = thisAssembly.GetType($"{enumTypeName}Helper");
                 object enumValue = (int)value;
 
                 if (enumHelperType != null)
@@ -336,7 +364,7 @@ namespace APIMATIC.SDK.Common
                     var subName = sName.ToString();
                     var subValue = obj[subName];
                     string fullSubName = string.IsNullOrWhiteSpace(name) ? subName : name + '[' + subName + ']';
-                    PrepareFormFieldsFromObject(fullSubName, subValue, keys, propInfo);
+                    PrepareFormFieldsFromObject(fullSubName, subValue, keys, propInfo, arrayDeserializationFormat);
                 }
             }
             else if (!(value.GetType().Namespace.StartsWith("System")))
@@ -353,7 +381,7 @@ namespace APIMATIC.SDK.Common
                     var subName = (jsonProperty != null) ? jsonProperty.PropertyName : pInfo.Name;
                     string fullSubName = string.IsNullOrWhiteSpace(name) ? subName : name + '[' + subName + ']';
                     var subValue = pInfo.GetValue(value, null);
-                    PrepareFormFieldsFromObject(fullSubName, subValue, keys, pInfo);
+                    PrepareFormFieldsFromObject(fullSubName, subValue, keys, pInfo, arrayDeserializationFormat);
                 }
             }
             else if (value is DateTime)
@@ -404,9 +432,24 @@ namespace APIMATIC.SDK.Common
             {
                 if (e.InnerExceptions.Count > 0)
                     throw e.InnerExceptions[0];
-                else
-                    throw e;
+                throw;
             }
+        }
+        /// <summary>
+        /// Deserializes according to value of discriminator
+        /// </summary>
+        /// <param name="responseBody">The response body to be deserialized</param>
+        /// <param name="discriminator">The discriminator field for base class</param>
+        /// <param name="classes">The dictionary of discrimnatorValue and types</param>
+        public static T GetResponse<T>(string responseBody, Dictionary<string, Type> classes, string discriminator)
+        {
+            T response = JsonDeserialize<T>(responseBody);
+            string prop = (string)typeof(T).GetProperty(discriminator).GetValue(response, null);
+            if (prop == null) return response;
+            Type t;
+            if (classes.TryGetValue(prop, out t))
+                return (T)typeof(APIHelper).GetMethod("JsonDeserialize").MakeGenericMethod(t).Invoke(null, new object[] {responseBody, null});
+            return response;
         }
     }
 }

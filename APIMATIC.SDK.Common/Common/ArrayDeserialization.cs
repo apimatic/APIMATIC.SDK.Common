@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace APIMATIC.SDK.Common.Common
+namespace APIMATIC.SDK.Common
 {
     public enum ArrayDeserialization
     {

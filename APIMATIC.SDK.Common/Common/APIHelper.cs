@@ -32,7 +32,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using APIMATIC.SDK.Common.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
@@ -289,10 +288,10 @@ namespace APIMATIC.SDK.Common
         /// <param name="keys">Contains a flattend and form friendly values</param>
         /// <param name="arrayDeserializationFormat">Format for deserializing array</param>
         /// <returns>Contains a flattend and form friendly values</returns>
-        public static Dictionary<string, object> PrepareFormFieldsFromObject(
-            string name, object value, Dictionary<string, object> keys = null, PropertyInfo propInfo = null, ArrayDeserialization arrayDeserializationFormat = ArrayDeserialization.UnIndexed)
+        public static List<KeyValuePair<string, object>> PrepareFormFieldsFromObject(
+            string name, object value, List<KeyValuePair<string, object>> keys = null, PropertyInfo propInfo = null, ArrayDeserialization arrayDeserializationFormat = ArrayDeserialization.UnIndexed)
         {
-            keys = keys ?? new Dictionary<string, object>();
+            keys = keys ?? new List<KeyValuePair<string, object>>();
 
             if (value == null)
             {
@@ -300,7 +299,7 @@ namespace APIMATIC.SDK.Common
             }
             else if (value is Stream)
             {
-                keys[name] = value;
+                keys.Add(new KeyValuePair<string, object>(name, value));
                 return keys;
             }
             else if (value is JObject)
@@ -333,7 +332,7 @@ namespace APIMATIC.SDK.Common
             }
             else if (value is JToken)
             {
-                keys[name] = value.ToString();
+                keys.Add(new KeyValuePair<string, object>(name, value.ToString()));
             }
             else if (value is Enum)
             {
@@ -354,7 +353,7 @@ namespace APIMATIC.SDK.Common
                         enumValue = enumHelperMethod.Invoke(null, new object[] { value });
                 }
 
-                keys[name] = enumValue;
+                keys.Add(new KeyValuePair<string, object>(name, enumValue));
             }
             else if (value is IDictionary)
             {
@@ -397,11 +396,11 @@ namespace APIMATIC.SDK.Common
                             convertedValue = JsonSerialize(value, (JsonConverter)Activator.CreateInstance(converterAttr.ConverterType, converterAttr.ConverterParameters)).Replace("\"", "");
                     }
                 }
-                keys[name] = (convertedValue) ?? ((DateTime)value).ToString(DateTimeFormat);
+                keys.Add(new KeyValuePair<string, object>(name, (convertedValue) ?? ((DateTime)value).ToString(DateTimeFormat)));
             }
             else
             {
-                keys[name] = value;
+                keys.Add(new KeyValuePair<string, object>(name, value));
             }
             return keys;
         }

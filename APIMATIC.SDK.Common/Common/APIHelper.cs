@@ -119,6 +119,17 @@ namespace APIMATIC.SDK.Common
         /// <param name="queryUrl">The query url string to append the parameters</param>
         /// <param name="parameters">The parameters to append</param>
         public static void AppendUrlWithQueryParameters
+            (StringBuilder queryBuilder, IEnumerable<KeyValuePair<string, object>> parameters)
+        {
+             AppendUrlWithQueryParameters(queryBuilder,parameters,ArrayDeserialization.UnIndexed);
+        }
+
+        /// <summary>
+        /// Appends the given set of parameters to the given query string
+        /// </summary>
+        /// <param name="queryUrl">The query url string to append the parameters</param>
+        /// <param name="parameters">The parameters to append</param>
+        public static void AppendUrlWithQueryParameters
             (StringBuilder queryBuilder, IEnumerable<KeyValuePair<string, object>> parameters, ArrayDeserialization arrayDeserializationFormat = ArrayDeserialization.UnIndexed, char separator = '&')
         {
             //perform parameter validation
@@ -433,22 +444,6 @@ namespace APIMATIC.SDK.Common
                     throw e.InnerExceptions[0];
                 throw;
             }
-        }
-        /// <summary>
-        /// Deserializes according to value of discriminator
-        /// </summary>
-        /// <param name="responseBody">The response body to be deserialized</param>
-        /// <param name="discriminator">The discriminator field for base class</param>
-        /// <param name="classes">The dictionary of discrimnatorValue and types</param>
-        public static T GetResponse<T>(string responseBody, Dictionary<string, Type> classes, string discriminator)
-        {
-            T response = JsonDeserialize<T>(responseBody);
-            string prop = (string)typeof(T).GetProperty(discriminator).GetValue(response, null);
-            if (prop == null) return response;
-            Type t;
-            if (classes.TryGetValue(prop, out t))
-                return (T)typeof(APIHelper).GetMethod("JsonDeserialize").MakeGenericMethod(t).Invoke(null, new object[] {responseBody, null});
-            return response;
         }
     }
 }

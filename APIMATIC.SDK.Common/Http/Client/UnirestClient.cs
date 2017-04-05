@@ -73,12 +73,12 @@ namespace APIMATIC.SDK.Http.Client
             {
                 await RetryHelper.RetryOnExceptionAsync(Retries, RetryInterval, async () =>
                 {
-                    task = await Task.Factory.StartNew(() => ExecuteAsString(request));
-                });
+                    task = await Task.Factory.StartNew(() => ExecuteAsString(request)).ConfigureAwait(false); 
+                }).ConfigureAwait(false); 
             }
             else
             {
-                task = await Task.Factory.StartNew(() => ExecuteAsString(request));
+                task = await Task.Factory.StartNew(() => ExecuteAsString(request)).ConfigureAwait(false);
             }
             return task;
         }
@@ -103,12 +103,12 @@ namespace APIMATIC.SDK.Http.Client
             {
                 await RetryHelper.RetryOnExceptionAsync(Retries, RetryInterval, async () =>
                 {
-                    task = await Task.Factory.StartNew(() => ExecuteAsString(request));
-                });
+                    task = await Task.Factory.StartNew(() => ExecuteAsString(request)).ConfigureAwait(false); 
+                }).ConfigureAwait(false); 
             }
             else
             {
-                task = await Task.Factory.StartNew(() => ExecuteAsString(request));
+                task = await Task.Factory.StartNew(() => ExecuteAsString(request)).ConfigureAwait(false); 
             }
             return task;
         }

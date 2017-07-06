@@ -36,11 +36,11 @@ namespace APIMATIC.SDK.Common
         public Dictionary<string, Type> dic;
         protected T Create(Type objectType, JObject jsonObject)
         {
-            typeName = jsonObject[typeName]?.ToString();
-            if (typeName == null)
+            JToken token;
+            if (!jsonObject.TryGetValue(typeName, out token))
                 return (T)Activator.CreateInstance(objectType);
             foreach (var type in dic)
-                if (type.Key == typeName)
+                if (type.Key.Equals(token.ToString()))
                     return (T)Activator.CreateInstance(type.Value);
             return (T)Activator.CreateInstance(objectType);
         }

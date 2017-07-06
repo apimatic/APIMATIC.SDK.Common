@@ -11,7 +11,7 @@ namespace APIMATIC.SDK.Common
         public static async Task RetryOnExceptionAsync(
             int times, TimeSpan delay, Func<Task> operation)
         {
-            await RetryOnExceptionAsync<Exception>(times, delay, operation);
+            await RetryOnExceptionAsync<Exception>(times, delay, operation).ConfigureAwait(false);
         }
         public static async Task RetryOnExceptionAsync<TException>(
             int times, TimeSpan delay, Func<Task> operation) where TException : Exception
@@ -25,7 +25,7 @@ namespace APIMATIC.SDK.Common
                 try
                 {
                     attempts++;
-                    await operation();
+                    await operation().ConfigureAwait(false);
                     break;
                 }
                 catch (TException ex)
@@ -33,9 +33,9 @@ namespace APIMATIC.SDK.Common
                     if (attempts == times)
                         throw;
 #if WINDOWS_UWP || DNXCORE50
-                    await Task.Delay(delay);
+                    await Task.Delay(delay).ConfigureAwait(false);
 #else
-                    await TaskEx.Delay(delay);
+                    await TaskEx.Delay(delay).ConfigureAwait(false);
 #endif
                 }
             } while (true);

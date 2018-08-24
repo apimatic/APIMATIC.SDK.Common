@@ -145,7 +145,7 @@ namespace APIMATIC.SDK.Http.Client
         /// <param name="username">Basic Auth username</param>
         /// <param name="password">Basic Auth password</param>
         /// <returns> HttpRequest initialised with the http parameters specified</returns>
-        HttpRequest PostBody(string queryUrl, Dictionary<string, string> headers, string body,
+        HttpRequest PostBody(string queryUrl, Dictionary<string, string> headers, object body,
             string username = null, string password = null);
 
         /// <summary>
@@ -169,7 +169,7 @@ namespace APIMATIC.SDK.Http.Client
         /// <param name="username">Basic Auth username</param>
         /// <param name="password">Basic Auth password</param>
         /// <returns> HttpRequest initialised with the http parameters specified</returns>
-        HttpRequest PutBody(string queryUrl, Dictionary<string, string> headers, string body,
+        HttpRequest PutBody(string queryUrl, Dictionary<string, string> headers, object body,
             string username = null, string password = null);
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace APIMATIC.SDK.Http.Client
         /// <param name="username">Basic Auth username</param>
         /// <param name="password">Basic Auth password</param>
         /// <returns> HttpRequest initialised with the http parameters specified</returns>
-        HttpRequest PatchBody(string queryUrl, Dictionary<string, string> headers, string body,
+        HttpRequest PatchBody(string queryUrl, Dictionary<string, string> headers, object body,
             string username = null, string password = null);
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace APIMATIC.SDK.Http.Client
         /// <param name="username">Basic Auth username</param>
         /// <param name="password">Basic Auth password</param>
         /// <returns> HttpRequest initialised with the http parameters specified</returns>
-        HttpRequest DeleteBody(string queryUrl, Dictionary<string, string> headers, string body,
+        HttpRequest DeleteBody(string queryUrl, Dictionary<string, string> headers, object body,
             string username = null, string password = null);
     }
 }

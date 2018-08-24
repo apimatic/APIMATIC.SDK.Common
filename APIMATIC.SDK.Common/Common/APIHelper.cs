@@ -241,21 +241,21 @@ namespace APIMATIC.SDK.Common
         /// <param name="separator">Separator to use for string concat</param>
         /// <returns>Representative string made up of array elements</returns>
         private static string flattenCollection(ICollection array, ArrayDeserialization fmt, char separator,
-            bool urlEncode, string key = "")
+           bool urlEncode, string key = "")
         {
             StringBuilder builder = new StringBuilder();
 
             string format = string.Empty;
             if (fmt == ArrayDeserialization.UnIndexed)
-                format = $"{key}[]={{0}}{{1}}";
+                format = String.Format("{0}[]={{0}}{{1}}", key);
             else if (fmt == ArrayDeserialization.Indexed)
-                format = $"{key}[{{2}}]={{0}}{{1}}";
+                format = String.Format("{0}[{{2}}]={{0}}{{1}}", key);
             else if (fmt == ArrayDeserialization.Plain)
-                format = $"{key}={{0}}{{1}}";
+                format = String.Format("{0}={{0}}{{1}}", key);
             else if (fmt == ArrayDeserialization.Csv || fmt == ArrayDeserialization.Psv ||
                      fmt == ArrayDeserialization.Tsv)
             {
-                builder.Append($"{key}=");
+                builder.Append(String.Format("{0}=", key));
                 format = "{0}{1}";
             }
             else
@@ -315,7 +315,7 @@ namespace APIMATIC.SDK.Common
             }
             else if (value is JObject)
             {
-                var valueAccept = (value as Newtonsoft.Json.Linq.JObject);
+                var valueAccept = (value as JObject);
                 foreach (var property in valueAccept.Properties())
                 {
                     string pKey = property.Name;
@@ -326,17 +326,31 @@ namespace APIMATIC.SDK.Common
             }
             else if (value is IList)
             {
-                int i = 0;
                 var enumerator = ((IEnumerable)value).GetEnumerator();
+
+                var hasNested = false;
                 while (enumerator.MoveNext())
                 {
                     var subValue = enumerator.Current;
-                    if (subValue == null) continue;
+                    if (subValue != null && (subValue is JObject || subValue is IList || subValue is IDictionary || !(subValue.GetType().Namespace.StartsWith("System"))))
+                    {
+                        hasNested = true;
+                        break;
+                    }
+                }
+
+                int i = 0;
+                enumerator.Reset();
+                while (enumerator.MoveNext())
+                {
                     var fullSubName = name + '[' + i + ']';
-                    if (arrayDeserializationFormat == ArrayDeserialization.UnIndexed)
+                    if (!hasNested && arrayDeserializationFormat == ArrayDeserialization.UnIndexed)
                         fullSubName = name + "[]";
-                    else if (arrayDeserializationFormat == ArrayDeserialization.Plain)
+                    else if (!hasNested && arrayDeserializationFormat == ArrayDeserialization.Plain)
                         fullSubName = name;
+
+                    var subValue = enumerator.Current;
+                    if (subValue == null) continue;
                     PrepareFormFieldsFromObject(fullSubName, subValue, keys, propInfo, arrayDeserializationFormat);
                     i++;
                 }
@@ -347,7 +361,7 @@ namespace APIMATIC.SDK.Common
             }
             else if (value is Enum)
             {
-#if WINDOWS_UWP || DNXCORE50
+#if WINDOWS_UWP || DNXCORE50 || NETSTANDARD1_3
                 Assembly thisAssembly = value.GetType().GetTypeInfo().Assembly;
 #else
                 Assembly thisAssembly = value.GetType().Assembly;
@@ -358,8 +372,12 @@ namespace APIMATIC.SDK.Common
 
                 if (enumHelperType != null)
                 {
+#if NETSTANDARD1_3
                     //this enum has an associated helper, use that to load the value
+                    MethodInfo enumHelperMethod = enumHelperType.GetRuntimeMethod("ToValue", new[] { value.GetType() });
+#else
                     MethodInfo enumHelperMethod = enumHelperType.GetMethod("ToValue", new[] { value.GetType() });
+#endif
                     if (enumHelperMethod != null)
                         enumValue = enumHelperMethod.Invoke(null, new object[] { value });
                 }
@@ -380,7 +398,11 @@ namespace APIMATIC.SDK.Common
             else if (!(value.GetType().Namespace.StartsWith("System")))
             {
                 //Custom object Iterate through its properties
-                var enumerator = value.GetType().GetProperties().GetEnumerator();
+#if NETSTANDARD1_3
+                var enumerator = value.GetType().GetRuntimeProperties().GetEnumerator();
+#else
+                var enumerator = value.GetType().GetProperties().GetEnumerator();;
+#endif
                 PropertyInfo pInfo = null;
                 var t = new JsonPropertyAttribute().GetType();
                 while (enumerator.MoveNext())

@@ -37,7 +37,9 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .NET Framework is automatically included -->
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
@@ -51,11 +53,10 @@
     <Compile Include="Common\APIHelper.cs" />
     <Compile Include="Common\UnixDateTimeConverter.cs" />
     <Compile Include="Http\Client\FileStreamInfo.cs" />
+    <Compile Include="Http\Client\HttpClient.cs" />
     <Compile Include="Http\Client\HttpContext.cs" />
     <Compile Include="Http\Client\HttpEventHandlers.cs" />
     <Compile Include="Http\Client\IHTTPClient.cs" />
-    <Compile Include="Http\Client\UnirestClient.cs" />
-    <Compile Include="Http\Request\HttpMethod.cs" />
     <Compile Include="Http\Request\HttpRequest.cs" />
     <Compile Include="Http\Response\HttpResponse.cs" />
     <Compile Include="Http\Response\HttpStringResponse.cs" />

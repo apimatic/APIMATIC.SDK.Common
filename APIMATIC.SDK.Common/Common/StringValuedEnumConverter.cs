@@ -80,9 +80,12 @@ namespace APIMATIC.SDK.Common
         /// <param name="value">The string valued enum element value</param>
         private void writeStringValue(JsonWriter writer, object value)
         {
-            Type enumHelperType = loadEnumHelperType(value.GetType());
+            System.Type enumHelperType = loadEnumHelperType(value.GetType());
+#if WINDOWS_UWP || DNXCORE50 || NETSTANDARD1_3
+            MethodInfo enumHelperMethod = enumHelperType.GetRuntimeMethod("ToValue", new[] { value.GetType() });
+#else 
             MethodInfo enumHelperMethod = enumHelperType.GetMethod("ToValue", new[] { value.GetType() });
-
+#endif
             object stringValue = enumHelperMethod.Invoke(null, new object[] { value });
             if (stringValue != null)
                 writer.WriteValue(stringValue);
@@ -94,20 +97,20 @@ namespace APIMATIC.SDK.Common
         /// Load the enum helper class against a given enum type
         /// </summary>
         /// <param name="enumType">The enum type to locate the helper</param>
-        /// <returns>Type of the helper class for the given enum type</returns>
-        private static Type loadEnumHelperType(Type enumType)
+        /// <returns>System.Type of the helper class for the given enum type</returns>
+        private static System.Type loadEnumHelperType(System.Type enumType)
         {
 
-#if WINDOWS_UWP || DNXCORE50
+#if WINDOWS_UWP || DNXCORE50 || NETSTANDARD1_3
             bool isNullableGeneric = enumType.GetTypeInfo().IsGenericType && enumType.GetGenericTypeDefinition() == typeof(Nullable<>);
-            Assembly assembly = enumType.GetTypeInfo().Assembly;
+            Assembly assembly = isNullableGeneric ? Nullable.GetUnderlyingType(enumType).GetTypeInfo().Assembly : enumType.GetTypeInfo().Assembly;
 
 #else
             bool isNullableGeneric = enumType.IsGenericType && enumType.GetGenericTypeDefinition() == typeof(Nullable<>);
-            Assembly assembly = enumType.Assembly;
+            Assembly assembly = isNullableGeneric ? Nullable.GetUnderlyingType(enumType).Assembly : enumType.Assembly;
 #endif
             string enumHelperClassName = string.Format("{0}Helper", isNullableGeneric ? Nullable.GetUnderlyingType(enumType).FullName : enumType.FullName);
-            Type enumHelperType = assembly.GetType(enumHelperClassName);
+            System.Type enumHelperType = assembly.GetType(enumHelperClassName);
 
             if (enumHelperType == null)
                 throw new InvalidCastException("Unable to load enum helper for casting value");
@@ -123,7 +126,7 @@ namespace APIMATIC.SDK.Common
         /// <param name="existingValue">The existing value of object being read</param>
         /// <param name="serializer">The calling serializer</param>
         /// <returns>The object value as enum element</returns>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(JsonReader reader, System.Type objectType, object existingValue, JsonSerializer serializer)
         {
             if (reader.TokenType == JsonToken.Null)
                 return null;
@@ -133,8 +136,12 @@ namespace APIMATIC.SDK.Common
                 if (reader.TokenType == JsonToken.String)
                 {
                     string enumStringValue = reader.Value.ToString();
-                    Type enumHelperType = loadEnumHelperType(objectType);
+                    System.Type enumHelperType = loadEnumHelperType(objectType);
+#if NETSTANDARD1_3
+                    MethodInfo enumHelperMethod = enumHelperType.GetRuntimeMethod("ParseString", new[] { typeof(System.String) });
+#else
                     MethodInfo enumHelperMethod = enumHelperType.GetMethod("ParseString", new[] { typeof(string) });
+#endif
                     object parsed = enumHelperMethod.Invoke(null, new object[] { enumStringValue });
                     return parsed;
                 }
@@ -154,13 +161,17 @@ namespace APIMATIC.SDK.Common
         /// <returns>
         /// <c>true</c> if this instance can convert the specified object type; otherwise, <c>false</c>.
         /// </returns>
-        public override bool CanConvert(Type objectType)
+        public override bool CanConvert(System.Type objectType)
         {
-            Type toCheck = objectType;
-            Type[] genericArgs = objectType.GetGenericArguments();
+            System.Type toCheck = objectType;
+#if WINDOWS_UWP || DNXCORE50 || NETSTANDARD1_3
+            System.Type[] genericArgs = objectType.GenericTypeArguments;
+#else
+            System.Type[] genericArgs = objectType.GetGenericArguments();
+#endif
             if ((genericArgs != null) && (genericArgs.Length > 0))
                 toCheck = genericArgs[genericArgs.Length - 1];
-#if WINDOWS_UWP || DNXCORE50
+#if WINDOWS_UWP || DNXCORE50 || NETSTANDARD1_3
             var attributes = toCheck.GetTypeInfo().GetCustomAttributes(typeof(JsonConverterAttribute), false);
 #else
             var attributes = toCheck.GetCustomAttributes(typeof(JsonConverterAttribute), false);

@@ -24,6 +24,7 @@ SOFTWARE.
 
 using System;
 using System.Collections.Generic;
+using System.Net.Http;
 
 namespace APIMATIC.SDK.Http.Request
 {
@@ -52,7 +53,7 @@ namespace APIMATIC.SDK.Http.Request
         /// <summary>
         /// Optional raw string to send as request body
         /// </summary>
-        public string Body { get; set; }
+        public object Body { get; set; }
 
         /// <summary>
         /// Optional username for Basic Auth
@@ -84,7 +85,7 @@ namespace APIMATIC.SDK.Http.Request
         /// <param name="username">Basic auth username</param>
         /// <param name="password">Basic auth password</param>
         public HttpRequest(HttpMethod method, string queryUrl, Dictionary<string, string> headers, string username, string password)
-            :this (method,queryUrl)
+            : this(method, queryUrl)
         {
             this.Headers = headers;
             this.Username = username;
@@ -100,7 +101,7 @@ namespace APIMATIC.SDK.Http.Request
         /// <param name="body">The string to use as raw body of the http request</param>
         /// <param name="username">Basic auth username</param>
         /// <param name="password">Basic auth password</param>
-        public HttpRequest(HttpMethod method, string queryUrl, Dictionary<string, string> headers, string body, string username, string password)
+        public HttpRequest(HttpMethod method, string queryUrl, Dictionary<string, string> headers, object body, string username, string password)
             : this(method, queryUrl, headers, username, password)
         {
             this.Body = body;
@@ -115,7 +116,7 @@ namespace APIMATIC.SDK.Http.Request
         /// <param name="formParameters">Form parameters collection for the request</param>
         /// <param name="username">Basic auth username</param>
         /// <param name="password">Basic auth password</param>
-        public HttpRequest(HttpMethod method, string queryUrl, Dictionary<string, string> headers, List<KeyValuePair<string, object>> formParameters, string username, string password)
+        public HttpRequest(HttpMethod method, string queryUrl, Dictionary<string, string> headers, List<KeyValuePair<string, Object>> formParameters, string username, string password)
             : this(method, queryUrl, headers, username, password)
         {
             this.FormParameters = formParameters;

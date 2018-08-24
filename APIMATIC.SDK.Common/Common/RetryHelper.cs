@@ -32,7 +32,7 @@ namespace APIMATIC.SDK.Common
                 {
                     if (attempts == times)
                         throw;
-#if WINDOWS_UWP || DNXCORE50
+#if WINDOWS_UWP || DNXCORE50 || NETSTANDARD1_3
                     await Task.Delay(delay).ConfigureAwait(false);
 #else
                     await TaskEx.Delay(delay).ConfigureAwait(false);

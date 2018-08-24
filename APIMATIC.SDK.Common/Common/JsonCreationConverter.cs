@@ -47,7 +47,11 @@ namespace APIMATIC.SDK.Common
 
         public override bool CanConvert(Type objectType)
         {
+#if  NETSTANDARD1_3
+            return typeof(T).GetTypeInfo().IsAssignableFrom(objectType.GetTypeInfo());
+#else
             return typeof(T).IsAssignableFrom(objectType);
+#endif
         }
 
         public override object ReadJson(JsonReader reader, Type objectType,

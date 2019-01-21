@@ -53,10 +53,18 @@ namespace APIMATIC.SDK.Common
         {
             if (null == obj)
                 return null;
+
+            var settings = new JsonSerializerSettings()
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            };
+
             if (converter == null)
-                return JsonConvert.SerializeObject(obj, Formatting.None, new IsoDateTimeConverter());
+                settings.Converters.Add(new IsoDateTimeConverter());
             else
-                return JsonConvert.SerializeObject(obj, Formatting.None, converter);
+                settings.Converters.Add(converter);
+
+            return JsonConvert.SerializeObject(obj, Formatting.None, settings);
         }
 
         /// <summary>
@@ -164,6 +172,8 @@ namespace APIMATIC.SDK.Common
                 else if (pair.Value is DateTime)
                     paramKeyValPair =
                         $"{Uri.EscapeDataString(pair.Key)}={((DateTime) pair.Value).ToString(DateTimeFormat)}";
+                else if (pair.Value is Boolean)
+                    paramKeyValPair = $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value.ToString().ToLowerInvariant())}";
                 else
                     paramKeyValPair = $"{Uri.EscapeDataString(pair.Key)}={Uri.EscapeDataString(pair.Value.ToString())}";
 

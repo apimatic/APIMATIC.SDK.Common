@@ -7,7 +7,15 @@
     <Authors>APIMATIC.SDK.Common-NetStandard</Authors>
     <AssemblyName>APIMATIC.SDK.Common</AssemblyName>
     <RootNamespace>APIMATIC.SDK.Common</RootNamespace>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <None Remove="APIMATIC.SDK.Common-UWP.nuget.targets" />
